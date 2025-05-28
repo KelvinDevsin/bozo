@@ -18,7 +18,7 @@ def is_admin():
         return False
     
     # Verificar se é o administrador específico (Kannenberg)
-    return user.username == 'Kannenberg'
+    return user.username == 'kelvin'
 
 @admin_bp.route('/login', methods=['POST'])
 def admin_login():
@@ -29,13 +29,13 @@ def admin_login():
         return jsonify({'success': False, 'message': 'Dados incompletos'}), 400
     
     # Verificar credenciais específicas do administrador
-    if data['username'] != 'Kannenberg' or data['password'] != 'kkkjjjkkk':
+    if data['username'] != 'kelvin' or data['password'] != 'kkkjjjkkk':
         return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
     
     # Verificar se o usuário admin existe, se não, criar
-    admin_user = User.query.filter_by(username='Kannenberg').first()
+    admin_user = User.query.filter_by(username='kelvin').first()
     if not admin_user:
-        admin_user = User(username='Kannenberg', email='admin@example.com')
+        admin_user = User(username='kelvin', email='admin1@example.com')
         admin_user.set_password('kkkjjjkkk')
         db.session.add(admin_user)
         db.session.commit()
