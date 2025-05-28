@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Loja de Contas Instagram</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            padding-top: 20px;
+            z-index: 100;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 10px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: #405DE6;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #405DE6;
+            border-color: #405DE6;
+        }
+        .btn-primary:hover {
+            background-color: #3951c6;
+            border-color: #3951c6;
+        }
+        .btn-success {
+            background-color: #43B02A;
+            border-color: #43B02A;
+        }
+        .btn-success:hover {
+            background-color: #389023;
+            border-color: #389023;
+        }
+        .table th {
+            font-weight: 600;
+        }
+        .badge-sold {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-available {
+            background-color: #28a745;
+            color: white;
+        }
+        #accountsSection, #usersSection, #settingsSection, #statsSection {
+            display: none;
+        }
+        #dashboardSection {
+            display: block;
+        }
+        .stat-card {
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .stat-card.primary {
+            background: linear-gradient(135deg, #405DE6, #5851DB);
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #43B02A, #2E8B57);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #FFC107, #FF9800);
+        }
+        .stat-card.danger {
+            background: linear-gradient(135deg, #DC3545, #C71585);
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .stat-card p {
+            margin-bottom: 0;
+            opacity: 0.8;
+        }
+        .stat-icon {
+            font-size: 3rem;
+            opacity: 0.3;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                min-height: auto;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <h4>Painel Admin</h4>
+            <p class="small">Loja de Contas Instagram</p>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('accounts')">
+                    <i class="bi bi-instagram"></i> Contas Instagram
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('users')">
+                    <i class="bi bi-people"></i> Utilizadores
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('settings')">
+                    <i class="bi bi-gear"></i> Configurações
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="/" target="_blank">
+                    <i class="bi bi-box-arrow-up-right"></i> Ver Site
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header d-flex justify-content-between align-items-center">
+            <h4 id="pageTitle">Dashboard</h4>
+            <div>
+                <span id="adminUsername">Admin</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card primary position-relative">
+                        <i class="bi bi-instagram stat-icon"></i>
+                        <h3 id="totalAccounts">0</h3>
+                        <p>Total de Contas</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card success position-relative">
+                        <i class="bi bi-check-circle stat-icon"></i>
+                        <h3 id="availableAccounts">0</h3>
+                        <p>Contas Disponíveis</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card warning position-relative">
+                        <i class="bi bi-cart-check stat-icon"></i>
+                        <h3 id="soldAccounts">0</h3>
+                        <p>Contas Vendidas</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card danger position-relative">
+                        <i class="bi bi-people stat-icon"></i>
+                        <h3 id="totalUsers">0</h3>
+                        <p>Utilizadores Registados</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    Ações Rápidas
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="showSection('accounts')">
+                                    <i class="bi bi-instagram"></i> Gerir Contas
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" onclick="showGenerateAccountsModal()">
+                                    <i class="bi bi-plus-circle"></i> Gerar Contas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts Section -->
+        <div id="accountsSection">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Contas Instagram</span>
+                    <div>
+                        <button class="btn btn-sm btn-success" onclick="showAddAccountModal()">
+                            <i class="bi bi-plus"></i> Adicionar Conta
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="showGenerateAccountsModal()">
+                            <i class="bi bi-magic"></i> Gerar Contas
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Utilizador</th>
+                                    <th>Senha</th>
+                                    <th>2FA</th>
+                                    <th>Preço</th>
+                                    <th>Estado</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountsTableBody">
+                                <!-- Accounts will be loaded here -->
+                                <tr>
+                                    <td colspan="8" class="text-center">Carregando contas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="usersSection">
+            <div class="card">
+                <div class="card-header">
+                    Utilizadores Registados
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome de Utilizador</th>
+                                    <th>Email</th>
+                                    <th>Data de Registo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Users will be loaded here -->
+                                <tr>
+                                    <td colspan="4" class="text-center">Carregando utilizadores...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsSection">
+            <div class="card">
+                <div class="card-header">
+                    Configurações do Site
+                </div>
+                <div class="card-body">
+                    <form id="settingsForm">
+                        <div class="mb-3">
+                            <label for="siteName" class="form-label">Nome do Site</label>
+                            <input type="text" class="form-control" id="siteName" value="Loja de Contas Instagram">
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountPrice" class="form-label">Preço Padrão das Contas (R$)</label>
+                            <input type="number" class="form-control" id="accountPrice" value="0.10" step="0.01" min="0.01">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="maintenanceMode">
+                            <label class="form-check-label" for="maintenanceMode">Modo de Manutenção</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Account Modal -->
+    <div class="modal fade" id="addAccountModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Conta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAccountForm">
+                        <div class="mb-3">
+                            <label for="accountUsername" class="form-label">Nome de Utilizador</label>
+                            <input type="text" class="form-control" id="accountUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountPassword" class="form-label">Senha</label>
+                            <input type="text" class="form-control" id="accountPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountTwoFactor" class="form-label">Código 2FA (opcional)</label>
+                            <input type="text" class="form-control" id="accountTwoFactor">
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountPrice" class="form-label">Preço (R$)</label>
+                            <input type="number" class="form-control" id="accountPrice" value="0.10" step="0.01" min="0.01" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="addAccount()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div class="modal fade" id="editAccountModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Conta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAccountForm">
+                        <input type="hidden" id="editAccountId">
+                        <div class="mb-3">
+                            <label for="editAccountUsername" class="form-label">Nome de Utilizador</label>
+                            <input type="text" class="form-control" id="editAccountUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountPassword" class="form-label">Senha</label>
+                            <input type="text" class="form-control" id="editAccountPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountTwoFactor" class="form-label">Código 2FA (opcional)</label>
+                            <input type="text" class="form-control" id="editAccountTwoFactor">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountPrice" class="form-label">Preço (R$)</label>
+                            <input type="number" class="form-control" id="editAccountPrice" step="0.01" min="0.01" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="editAccountIsSold">
+                            <label class="form-check-label" for="editAccountIsSold">Conta Vendida</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="updateAccount()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Accounts Modal -->
+    <div class="modal fade" id="generateAccountsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gerar Contas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateAccountsForm">
+                        <div class="mb-3">
+                            <label for="generateCount" class="form-label">Quantidade de Contas</label>
+                            <input type="number" class="form-control" id="generateCount" value="10" min="1" max="100" required>
+                            <div class="form-text">Máximo de 100 contas por vez.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="generateAccounts()">Gerar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir esta conta?</p>
+                    <p><strong>Esta ação não pode ser desfeita.</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let accountsData = [];
+        let usersData = [];
+        let currentAccountId = null;
+        
+        // Bootstrap modals
+        let addAccountModal = null;
+        let editAccountModal = null;
+        let generateAccountsModal = null;
+        let deleteConfirmModal = null;
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is admin
+            checkAdminAuth();
+            
+            // Initialize Bootstrap modals
+            addAccountModal = new bootstrap.Modal(document.getElementById('addAccountModal'));
+            editAccountModal = new bootstrap.Modal(document.getElementById('editAccountModal'));
+            generateAccountsModal = new bootstrap.Modal(document.getElementById('generateAccountsModal'));
+            deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            
+            // Initialize event listeners
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                if (currentAccountId !== null) {
+                    deleteAccount(currentAccountId);
+                }
+            });
+            
+            document.getElementById('settingsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Save settings logic would go here
+                alert('Configurações salvas com sucesso!');
+            });
+        });
+        
+        // Check if user is admin
+        function checkAdminAuth() {
+            fetch('/api/user/check-auth')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.authenticated) {
+                        document.getElementById('adminUsername').textContent = data.username;
+                        loadDashboardData();
+                    } else {
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking authentication:', error);
+                    window.location.href = '/';
+                });
+        }
+        
+        // Load dashboard data
+        function loadDashboardData() {
+            // Load accounts
+            fetch('/api/admin/accounts')
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = '/';
+                            return;
+                        }
+                        throw new Error('Failed to load accounts');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        accountsData = data.accounts;
+                        updateDashboardStats();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading accounts:', error);
+                });
+            
+            // Load users
+            fetch('/api/admin/users')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load users');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        usersData = data.users;
+                        updateDashboardStats();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading users:', error);
+                });
+        }
+        
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            if (accountsData.length > 0) {
+                const totalAccounts = accountsData.length;
+                const soldAccounts = accountsData.filter(account => account.is_sold).length;
+                const availableAccounts = totalAccounts - soldAccounts;
+                
+                document.getElementById('totalAccounts').textContent = totalAccounts;
+                document.getElementById('soldAccounts').textContent = soldAccounts;
+                document.getElementById('availableAccounts').textContent = availableAccounts;
+            }
+            
+            if (usersData.length > 0) {
+                document.getElementById('totalUsers').textContent = usersData.length;
+            }
+        }
+        
+        // Show section
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('accountsSection').style.display = 'none';
+            document.getElementById('usersSection').style.display = 'none';
+            document.getElementById('settingsSection').style.display = 'none';
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section and set active nav link
+            switch (section) {
+                case 'dashboard':
+                    document.getElementById('dashboardSection').style.display = 'block';
+                    document.getElementById('pageTitle').textContent = 'Dashboard';
+                    document.querySelector('.nav-link[onclick="showSection(\'dashboard\')"]').classList.add('active');
+                    loadDashboardData();
+                    break;
+                case 'accounts':
+                    document.getElementById('accountsSection').style.display = 'block';
+                    document.getElementById('pageTitle').textContent = 'Contas Instagram';
+                    document.querySelector('.nav-link[onclick="showSection(\'accounts\')"]').classList.add('active');
+                    loadAccounts();
+                    break;
+                case 'users':
+                    document.getElementById('usersSection').style.display = 'block';
+                    document.getElementById('pageTitle').textContent = 'Utilizadores';
+                    document.querySelector('.nav-link[onclick="showSection(\'users\')"]').classList.add('active');
+                    loadUsers();
+                    break;
+                case 'settings':
+                    document.getElementById('settingsSection').style.display = 'block';
+                    document.getElementById('pageTitle').textContent = 'Configurações';
+                    document.querySelector('.nav-link[onclick="showSection(\'settings\')"]').classList.add('active');
+                    break;
+            }
+        }
+        
+        // Load accounts
+        function loadAccounts() {
+            fetch('/api/admin/accounts')
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = '/';
+                            return;
+                        }
+                        throw new Error('Failed to load accounts');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        accountsData = data.accounts;
+                        const tableBody = document.getElementById('accountsTableBody');
+                        tableBody.innerHTML = '';
+                        
+                        if (accountsData.length === 0) {
+                            tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhuma conta encontrada</td></tr>';
+                            return;
+                        }
+                        
+                        accountsData.forEach(account => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${account.id}</td>
+                                <td>${account.username}</td>
+                                <td>${account.password}</td>
+                                <td>${account.two_factor || '-'}</td>
+                                <td>R$${account.price.toFixed(2)}</td>
+                                <td>
+                                    <span class="badge ${account.is_sold ? 'badge-sold' : 'badge-available'}">
+                                        ${account.is_sold ? 'Vendida' : 'Disponível'}
+                                    </span>
+                                </td>
+                                <td>${account.created_at}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="showEditAccountModal(${account.id})">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="showDeleteConfirmModal(${account.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        document.getElementById('accountsTableBody').innerHTML = '<tr><td colspan="8" class="text-center">Erro ao carregar contas</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading accounts:', error);
+                    document.getElementById('accountsTableBody').innerHTML = '<tr><td colspan="8" class="text-center">Erro ao carregar contas</td></tr>';
+                });
+        }
+        
+        // Load users
+        function loadUsers() {
+            fetch('/api/admin/users')
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = '/';
+                            return;
+                        }
+                        throw new Error('Failed to load users');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        usersData = data.users;
+                        const tableBody = document.getElementById('usersTableBody');
+                        tableBody.innerHTML = '';
+                        
+                        if (usersData.length === 0) {
+                            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum utilizador encontrado</td></tr>';
+                            return;
+                        }
+                        
+                        usersData.forEach(user => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${user.id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td>${user.created_at}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="4" class="text-center">Erro ao carregar utilizadores</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading users:', error);
+                    document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="4" class="text-center">Erro ao carregar utilizadores</td></tr>';
+                });
+        }
+        
+        // Show add account modal
+        function showAddAccountModal() {
+            document.getElementById('addAccountForm').reset();
+            addAccountModal.show();
+        }
+        
+        // Show edit account modal
+        function showEditAccountModal(accountId) {
+            const account = accountsData.find(acc => acc.id === accountId);
+            if (!account) return;
+            
+            document.getElementById('editAccountId').value = account.id;
+            document.getElementById('editAccountUsername').value = account.username;
+            document.getElementById('editAccountPassword').value = account.password;
+            document.getElementById('editAccountTwoFactor').value = account.two_factor || '';
+            document.getElementById('editAccountPrice').value = account.price;
+            document.getElementById('editAccountIsSold').checked = account.is_sold;
+            
+            editAccountModal.show();
+        }
+        
+        // Show generate accounts modal
+        function showGenerateAccountsModal() {
+            document.getElementById('generateAccountsForm').reset();
+            generateAccountsModal.show();
+        }
+        
+        // Show delete confirmation modal
+        function showDeleteConfirmModal(accountId) {
+            currentAccountId = accountId;
+            deleteConfirmModal.show();
+        }
+        
+        // Add account
+        function addAccount() {
+            const username = document.getElementById('accountUsername').value;
+            const password = document.getElementById('accountPassword').value;
+            const twoFactor = document.getElementById('accountTwoFactor').value;
+            const price = parseFloat(document.getElementById('accountPrice').value);
+            
+            if (!username || !password || isNaN(price)) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            fetch('/api/admin/accounts/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    two_factor: twoFactor,
+                    price: price
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addAccountModal.hide();
+                    loadAccounts();
+                    loadDashboardData();
+                    alert('Conta adicionada com sucesso!');
+                } else {
+                    alert('Erro ao adicionar conta: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error adding account:', error);
+                alert('Erro ao adicionar conta. Por favor, tente novamente.');
+            });
+        }
+        
+        // Update account
+        function updateAccount() {
+            const accountId = document.getElementById('editAccountId').value;
+            const username = document.getElementById('editAccountUsername').value;
+            const password = document.getElementById('editAccountPassword').value;
+            const twoFactor = document.getElementById('editAccountTwoFactor').value;
+            const price = parseFloat(document.getElementById('editAccountPrice').value);
+            const isSold = document.getElementById('editAccountIsSold').checked;
+            
+            if (!username || !password || isNaN(price)) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            fetch(`/api/admin/accounts/${accountId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    two_factor: twoFactor,
+                    price: price,
+                    is_sold: isSold
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    editAccountModal.hide();
+                    loadAccounts();
+                    loadDashboardData();
+                    alert('Conta atualizada com sucesso!');
+                } else {
+                    alert('Erro ao atualizar conta: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating account:', error);
+                alert('Erro ao atualizar conta. Por favor, tente novamente.');
+            });
+        }
+        
+        // Delete account
+        function deleteAccount(accountId) {
+            fetch(`/api/admin/accounts/${accountId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    deleteConfirmModal.hide();
+                    loadAccounts();
+                    loadDashboardData();
+                    alert('Conta removida com sucesso!');
+                } else {
+                    alert('Erro ao remover conta: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting account:', error);
+                alert('Erro ao remover conta. Por favor, tente novamente.');
+            });
+        }
+        
+        // Generate accounts
+        function generateAccounts() {
+            const count = parseInt(document.getElementById('generateCount').value);
+            
+            if (isNaN(count) || count < 1 || count > 100) {
+                alert('Por favor, insira um número válido entre 1 e 100.');
+                return;
+            }
+            
+            fetch('/api/admin/generate-accounts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    count: count
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    generateAccountsModal.hide();
+                    loadAccounts();
+                    loadDashboardData();
+                    alert('Contas geradas com sucesso!');
+                } else {
+                    alert('Erro ao gerar contas: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error generating accounts:', error);
+                alert('Erro ao gerar contas. Por favor, tente novamente.');
+            });
+        }
+        
+        // Logout
+        function logout() {
+            fetch('/api/user/logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('Error during logout:', error);
+                window.location.href = '/';
+            });
+        }
+    </script>
+</body>
+</html>
